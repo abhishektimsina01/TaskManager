@@ -26,7 +26,56 @@ def getAllTodos(request):
     print(serialized.data)
     return Response(data = serialized.data, status = status.HTTP_202_ACCEPTED)
 
+
+# get the specific task of id = id
+@api_view(['GET'])
+def getTask(request, id):
+    try:
+        print(request.GET)
+        task = Task.objects.get(id = id)
+    except Task.DoesNotExist:
+        return Response({'error' : 'does not exist'}, status= status.HTTP_404_NOT_FOUND)
+    serialized = TaskSerializer(task)
+    print(serialized)
+    return Response(serialized.data, status=status.HTTP_202_ACCEPTED)
+
+
 @api_view(['POST'])
 def postTask(request):
-    # we need to send the request.data to the serializer for validation and save it
-    pass
+    print(request.POST)
+    print(request.data)
+    serialized = TaskSerializer(data = request.data)
+    # serialized.is_valid() checks for all the validation (model based validation, custom field validation, object validation)
+    if not serialized.is_valid():
+        
+        return Response(serialized.errors)
+    else:
+        # if everything is valid then we save it to create()
+        serialized.save()
+        return Response(serialized.data)
+
+
+@api_view(['PUT'])
+def editTask(request, id):
+    try:
+        task = Task.objects.get(id = id)
+    except Task.DoesNotExist:
+        return Response({'error' : 'does not exist'})
+    serialized = TaskSerializer(task, data = request.data, partial = True)
+    if serialized.is_valid():
+        serialized.save()
+        return Response(serialized.data)
+    return Response(serialized.errors)
+
+
+@api_view(['DELETE'])
+def deleteTask(request, id):
+    try:
+        print(request.DELETE)
+        task = Task.objects.get(id = id)
+    except Task.DoesNotExist:
+        return Response({'error' : 'was not found or multiple found'})
+    serialized = TaskSerializer(task)
+    # the task exist so we delete the record
+    task.delete()
+    return Response({"data " : serialized.data, "message" : "Task deleted"})

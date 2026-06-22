@@ -2,6 +2,8 @@ from rest_framework.serializers import Serializer, ModelSerializer
 from rest_framework import serializers
 from .models import Task, Users
 
+
+# we have to write the field types and the create, update logic
 class TaskSerializer(Serializer):
 
     id = serializers.UUIDField(required = True)
@@ -23,6 +25,8 @@ class TaskSerializer(Serializer):
         instance['deadline'] = validated_data.get("deadline", instance['deadline'])
         instance.save()
         return instance
+
+
 
 # create and update is already built-in, we only have build it if we want to customize
 class TaskModelSerializer(ModelSerializer):
