@@ -21,5 +21,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     # link the urls.py to the urls.py of tasks application
-    path('task/', include("tasks.urls"))
+    path('api/', include("tasks.urls"))
 ]
