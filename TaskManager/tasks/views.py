@@ -41,7 +41,7 @@ def getTask(request, id):
         # calculate the time left
         deadline = serialized.data.get("deadline")
         current_time = datetime.now()
-        print({"current time" : current_time, "deadline" : deadline})
+        print({"current time" : datetime.now(), "deadline" : deadline})
         return Response({'data' : serialized.data, "status" : "the task is not completed yet", "time left" : f""})
     # print(serialized.data)
     return Response({'data' : serialized.data, "status" : f"the task is completed."}, status=status.HTTP_202_ACCEPTED)
@@ -86,3 +86,11 @@ def deleteTask(request, id):
     # the task exist so we delete the record
     task.delete()
     return Response({"data " : serialized.data, "message" : "Task deleted"})
+
+@api_view(['DELETE'])
+def deleteAll(request):
+    all_tasks = Task.objects.all()
+    serialized = TaskModelSerializer(all_tasks, many = True)
+    print(serialized.data)
+    Task.objects.all().delete()
+    return Response({'data': serialized.data, 'message' : "deleted all"})   
