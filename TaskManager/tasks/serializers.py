@@ -5,6 +5,8 @@ from .models import Task, Users
 
 # we have to write the field types and the create, update logic
 class TaskSerializer(Serializer):
+    
+    # read_only only makes us read the data from the model not the opposite
     id = serializers.UUIDField(read_only = True)
     name = serializers.CharField(required = True)
     description = serializers.CharField(required = False)
@@ -12,7 +14,7 @@ class TaskSerializer(Serializer):
     completed_at = serializers.BooleanField(read_only = True)
     deadline = serializers.DateTimeField(required = False)
     created_at = serializers.DateTimeField(read_only = True)
-    updated_at = serializers.DateTimeField(read_only = False)
+    updated_at = serializers.DateTimeField(read_only = True)
 
     # is called when the .save() is called after proper validation 
     def create(self, validated_data):

@@ -11,6 +11,8 @@ from rest_framework import status
 from .models import Task, Users
 from .serializers import TaskModelSerializer, TaskSerializer
 from datetime import timedelta, datetime
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 
 # Create your views here:- 
 
@@ -40,9 +42,18 @@ def getTask(request, id):
     if not serialized.data.get("completed"):
         # calculate the time left
         deadline = serialized.data.get("deadline")
-        current_time = datetime.now()
-        print({"current time" : datetime.now(), "deadline" : deadline})
-        return Response({'data' : serialized.data, "status" : "the task is not completed yet", "time left" : f""})
+        # parse_datetime is used to parse the string date to timezone
+        deadline = parse_datetime(deadline)
+        current_time = timezone.now()
+        print(deadline.replace(tzinfo=None))
+        print(current_time.replace(tzinfo=None))
+        if deadline > current_time:
+            difference = deadline - current_time
+            print(deadline - current_time)
+            return Response({'data' : serialized.data, "status" : "the task is not completed yet. there is still time left", "time left": f"{difference}"})
+        
+        return Response({'data' : serialized.data, "status" : "the task is not completed yet. deadline expired", "time left" : f"0"})
+        
     # print(serialized.data)
     return Response({'data' : serialized.data, "status" : f"the task is completed."}, status=status.HTTP_202_ACCEPTED)
 
