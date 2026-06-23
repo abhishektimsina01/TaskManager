@@ -5,12 +5,14 @@ from .models import Task, Users
 
 # we have to write the field types and the create, update logic
 class TaskSerializer(Serializer):
-
-    id = serializers.UUIDField(required = True)
+    id = serializers.UUIDField(read_only = True)
     name = serializers.CharField(required = True)
-    description = serializers.CharField()
-    completed = serializers.BooleanField()
-    deadline = serializers.DateTimeField()
+    description = serializers.CharField(required = False)
+    completed = serializers.BooleanField(required = False)
+    completed_at = serializers.BooleanField(read_only = True)
+    deadline = serializers.DateTimeField(required = False)
+    created_at = serializers.DateTimeField(read_only = True)
+    updated_at = serializers.DateTimeField(read_only = False)
 
     # is called when the .save() is called after proper validation 
     def create(self, validated_data):

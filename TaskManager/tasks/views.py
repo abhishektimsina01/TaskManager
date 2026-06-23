@@ -10,6 +10,7 @@ from rest_framework.generics import ListCreateAPIView, RetrieveDestroyAPIView, R
 from rest_framework import status
 from .models import Task, Users
 from .serializers import TaskModelSerializer, TaskSerializer
+from datetime import timedelta, datetime
 
 # Create your views here:- 
 
@@ -36,18 +37,24 @@ def getTask(request, id):
     except Task.DoesNotExist:
         return Response({'error' : 'does not exist'}, status= status.HTTP_404_NOT_FOUND)
     serialized = TaskSerializer(task)
-    print(serialized)
-    return Response(serialized.data, status=status.HTTP_202_ACCEPTED)
+    if not serialized.data.get("completed"):
+        # calculate the time left
+        deadline = serialized.data.get("deadline")
+        current_time = datetime.now()
+        print({"current time" : current_time, "deadline" : deadline})
+        return Response({'data' : serialized.data, "status" : "the task is not completed yet", "time left" : f""})
+    # print(serialized.data)
+    return Response({'data' : serialized.data, "status" : f"the task is completed."}, status=status.HTTP_202_ACCEPTED)
 
 
 @api_view(['POST'])
 def postTask(request):
+    print(datetime.now())
     print(request.POST)
     print(request.data)
     serialized = TaskSerializer(data = request.data)
     # serialized.is_valid() checks for all the validation (model based validation, custom field validation, object validation)
     if not serialized.is_valid():
-        
         return Response(serialized.errors)
     else:
         # if everything is valid then we save it to create()

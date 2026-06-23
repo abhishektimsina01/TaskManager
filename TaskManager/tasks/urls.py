@@ -7,7 +7,7 @@ router = DefaultRouter()
 
 urlpatterns = [
      path('getAll/', getAllTodos),
-     path("getOne/<int:id>/", getTask),
+     path("getOne/<uuid:id>/", getTask),
      path("postTask/", postTask),
      path("editTsak/<int:id>/", editTask),
      path("deleteTask/<int:id>/", deleteTask)
