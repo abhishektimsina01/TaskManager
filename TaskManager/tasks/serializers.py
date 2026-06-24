@@ -28,12 +28,6 @@ class TaskSerializer(Serializer):
         print(instance)
         instance.name = validated_data.get('name', instance.name)
         instance.description = validated_data.get('description', instance.description)
-        # instance.completed = validated_data.get('completed', instance.completed)
-        # if not instance.completed and validated_data.get("completed"):
-        #     print("Original", instance.completed)
-        #     print("Change", validated_data)
-        #     instance.completed_at = timezone.now()
-        #     print(instance.com)
         if not validated_data.get("completed", False):
             # if not given
             instance.completed = False
