@@ -33,6 +33,7 @@ class Task(models.Model):
     deadline = models.DateTimeField(default = default_deadline)
 
     # completed at
+    # set to the time when the task is completed, completed is set to True
     completed_at = models.DateTimeField(null= True)
 
     # auto_now_add = True means when it is created then the time at that moment
