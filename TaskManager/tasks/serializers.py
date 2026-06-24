@@ -1,6 +1,8 @@
 from rest_framework.serializers import Serializer, ModelSerializer 
 from rest_framework import serializers
 from .models import Task, Users
+from django.utils import timezone
+from zoneinfo import ZoneInfo
 
 
 # we have to write the field types and the create, update logic
@@ -11,7 +13,7 @@ class TaskSerializer(Serializer):
     name = serializers.CharField(required = True)
     description = serializers.CharField(required = False)
     completed = serializers.BooleanField(required = False)
-    completed_at = serializers.BooleanField(read_only = True)
+    completed_at = serializers.DateTimeField(required = False)
     deadline = serializers.DateTimeField(required = False)
     created_at = serializers.DateTimeField(read_only = True)
     updated_at = serializers.DateTimeField(read_only = True)
@@ -22,11 +24,27 @@ class TaskSerializer(Serializer):
     
     # similarly but should be passed the instance and the partial = True
     def update(self, instance, validated_data):
-        # it works both for the partial as well as the full update as it uses the 
-        instance['name'] = validated_data.get('name', instance['name'])
-        instance['description'] = validated_data.get('description', instance['description'])
-        instance['completed'] = validated_data.get('completed', instance['completed'])
-        instance['deadline'] = validated_data.get("deadline", instance['deadline'])
+        ktm = ZoneInfo("Asia/Kathmandu")
+        print(instance)
+        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
+        # instance.completed = validated_data.get('completed', instance.completed)
+        # if not instance.completed and validated_data.get("completed"):
+        #     print("Original", instance.completed)
+        #     print("Change", validated_data)
+        #     instance.completed_at = timezone.now()
+        #     print(instance.com)
+        if not validated_data.get("completed", False):
+            # if not given
+            instance.completed = False
+            instance.completed_at = None
+        else:
+            # if given
+            instance.completed = True
+            instance.completed_at = timezone.now()
+
+            print("completed time", instance.completed_at)
+        instance.deadline = validated_data.get("deadline", instance.deadline)
         instance.save()
         return instance
 

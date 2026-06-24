@@ -35,9 +35,8 @@ def getAllTodos(request):
 @api_view(['GET'])
 def getTask(request, id):
     try:
+        print(timezone.now())
         print(request.GET)
-        for i in request.query_params:
-            print(i, request.query_params.get(i))
         task = Task.objects.get(id = id)
     except Task.DoesNotExist:
         return Response({'error' : 'does not exist'}, status= status.HTTP_404_NOT_FOUND)
@@ -47,7 +46,7 @@ def getTask(request, id):
         ktm = ZoneInfo("Asia/Kathmandu")
         deadline = serialized.data.get("deadline")
         # parse_datetime is used to parse the string date to timezone
-        deadline = parse_datetime(deadline).replace(tzinfo=None)
+        deadline = parse_datetime(deadline).astimezone(ktm).replace(tzinfo=None)
         # convert the timezone from 00:00 to 05:45 for match logically
         current_time = timezone.now().astimezone(ktm).replace(tzinfo=None)
         # instead of using the current_time, we can use the datetime.now() as we dont have to replace the 
@@ -56,7 +55,7 @@ def getTask(request, id):
         if deadline > current_time:
             difference = deadline - current_time
             print(deadline - current_time)
-            return Response({'data' : serialized.data, "status" : "the task is not completed yet. there is still time left", "time left": f"{difference}"})
+            return Response({'data' : serialized.data, "status" : "the task is not completed yet. there is still time left", "deadline" : str(deadline), "current time" : str(current_time), "time left": f"{difference}"})
         return Response({'data' : serialized.data, "status" : "the task is not completed yet. deadline expired", "time left" : f"0"})
     
     completed_time = serialized.data.get("completed_at")
@@ -98,7 +97,6 @@ def postTask(request):
     else:
         # if everything is valid then we save it to create()
         serialized.save()
-        print(serialized.data.get('id'))
         return Response(serialized.data)
 
 
@@ -121,13 +119,21 @@ def editTask(request, id):
         task = Task.objects.get(id = id)
     except Task.DoesNotExist:
         return Response({'error' : "no record with the id found"})
-    print("given partial data", request.data)
-    return Response(request.data)
+    
+    # original instance
+    before_change = TaskSerializer(task)
+    print("Original Data")
+    print(before_change.data)
+    serialized = TaskSerializer(instance = task, data = request.data, partial = True)
+    if not serialized.is_valid():
+        return Response(serialized.errors)
+    serialized.save()
+    return Response(serialized.data)
 
 
 @api_view(['DELETE'])
 def deleteTask(request, id):
-    try:    
+    try:
         print(request.DELETE)
         task = Task.objects.get(id = id)
     except Task.DoesNotExist:
