@@ -8,8 +8,10 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView, DestroyAPIView, UpdateAPIView
 from rest_framework.generics import ListCreateAPIView, RetrieveDestroyAPIView, RetrieveUpdateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import status
-from .models import Task, Users
+from .models import Task
+from .models import Users as UsersModel
 from .serializers import TaskModelSerializer, TaskSerializer
+from .serializers import UserSerializer
 from datetime import timedelta, datetime
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -70,7 +72,7 @@ def completedTask(request):
     allTasks = Task.objects.all()
     completedSerialized = TaskSerializer(tasks, many = True)
     print(completedSerialized.data)
-    allSerialized = TaskSerializer(allTasks, many = True)
+    allSerialized = TaskModelSerializer(allTasks, many = True)
     print(allSerialized.data)
     print("="*100)
     completedTask = []
@@ -151,3 +153,49 @@ def deleteAll(request):
     print(serialized.data)
     Task.objects.all().delete()
     return Response({'data': serialized.data, 'message' : "deleted all"})
+
+
+# class based view
+class Users(APIView):
+
+    # in APIView, we can only use all the htpp methods ones and not more than one
+    def get(self, request):
+        print("get request")
+        print(request.GET)
+        users = UsersModel.objects.all()
+        print(users)
+        serialized = UserSerializer(users, many = True)
+        print(serialized.data)
+        return Response(serialized.data)
+
+    def post(self, request):
+        print(request.data)
+        # return Response(request.data)
+        serialized = UserSerializer(data = request.data)
+        if serialized.is_valid():
+            serialized.save()
+            return Response(serialized.data)
+        else:
+            return Response(serialized.errors)
+
+    def patch(self, request, id):
+        print(request.data)
+        try:
+            user = UsersModel.objects.get(id = id)
+        except UsersModel.DoesNotExist:
+            return Response({'error': 'user doesnot exist'})
+        user_org = UserSerializer(user)
+        print(user_org.data)
+        serialized = UserSerializer(instance = user, data = request.data, partial = True)
+        if not serialized.is_valid():
+            return Response({serialized.errors})
+        print(serialized.is_valid())
+        serialized.save()
+        return Response(serialized.data)
+    
+    def delete(self, request):
+        print(request.DELETE)
+        users = UsersModel.objects.all()
+        serialized = UserSerializer(users, many = True)
+        users.delete()
+        return Response({'users' : serialized.data, 'message' : 'deleted all users'})

@@ -9,6 +9,9 @@ from zoneinfo import ZoneInfo
 class TaskSerializer(Serializer):
     
     # read_only only makes us read the data from the model not the opposite
+    # required = True/False
+    # read_only = True/False
+    # write_only = True/False
     id = serializers.UUIDField(read_only = True)
     name = serializers.CharField(required = True)
     description = serializers.CharField(required = False)
@@ -48,10 +51,12 @@ class TaskSerializer(Serializer):
 class TaskModelSerializer(ModelSerializer):
     class Meta:
         model = Task
+        # field is all the fields to include
         fields = "__all__"
-    # field validation
-    # object validation can be added to the data
-
+        # we dont have to send
+        read_only_fields = ["id", "created_at", "updated_at"]
+    
+    # we can perform the overwrtie of the data if we want to by using the create and updateand then again pass it to the super().create() and super().update()
     def create(self, validated_data):
         # perform manipulation on the validated_data before the create
         return super().create(validated_data)
@@ -59,3 +64,24 @@ class TaskModelSerializer(ModelSerializer):
     # instance is the real object and validated_data is the to be changed to reocrd
     def update(self, instance, validated_data):
         return super().update(instance, validated_data)
+    
+
+
+class UserSerializer(serializers.Serializer):
+
+    id = serializers.UUIDField(read_only = True)
+    username = serializers.CharField(required = True)
+    password = serializers.CharField(required = True, write_only = True)
+    role = serializers.CharField(required = False)
+    created_data = serializers.DateTimeField(read_only = True)
+
+    def create(self, validated_data):
+        return Users.objects.create(**validated_data)
+    
+    def update(self, instance, validated_data):
+        # instance is the real data and validated_data is the data sent by the user
+        instance.username = validated_data.get("username", instance.username)
+        instance.password = validated_data.get("password", instance.password)
+        instance.role = validated_data.get("role", instance.role)
+        instance.save()
+        return instance

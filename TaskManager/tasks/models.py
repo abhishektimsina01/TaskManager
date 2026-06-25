@@ -13,20 +13,20 @@ class Users(models.Model):
         ("user", "User")
     ]
     id = models.UUIDField(primary_key= True, default= uuid.uuid4)
-    username = models.CharField(max_length=20, db_index= True)
+    username = models.CharField(max_length=20, db_index= True, unique=True)
     password = models.CharField(max_length=20)
-    role = models.CharField(choices= ROLE_CHOICES)
+    role = models.CharField(choices= ROLE_CHOICES, default="user")
     created_at = models.DateTimeField(auto_now=True)
     
 # for the time to complete the task, we can use function to use the timezone and timedelta
 def default_deadline():
-    return timezone.now() + timedelta(hours= 24)
+    return timezone.now() + timedelta(hours= 24)    
 
 # task model
 class Task(models.Model):
     id = models.UUIDField(primary_key=True, default= uuid.uuid4)
     name = models.CharField(max_length=50)
-    description = models.TextField()
+    description = models.TextField(default = "")
     completed = models.BooleanField(default= True)
 
     # target time to complete
