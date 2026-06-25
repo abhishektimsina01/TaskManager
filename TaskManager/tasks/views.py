@@ -198,3 +198,19 @@ class Users(APIView):
         serialized = UserSerializer(users, many = True)
         users.delete()
         return Response({'users' : serialized.data, 'message' : 'deleted all users'})
+
+@api_view(['GET'])
+def getUserTask(request, id):
+    try:
+        user = UsersModel.objects.get(id = id)
+    except UsersModel.DoesNotExist:
+        return Response({'error': "No user with that id"})
+    user_serialized = UserSerializer(user)
+    print(user_serialized.data)
+
+    # filter all the task that is made by the user
+    tasks = Task.objects.filter(user_id = id)
+    tasks_serialized = TaskSerializer(tasks, many = True)
+    for task in tasks_serialized.data:
+        task.pop("user")
+    return Response({ "user" : user_serialized.data, 'task' : tasks_serialized.data})

@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import getAllTodos, postTask, getTask, deleteTask, editTask, deleteAll, completedTask
+from .views import getAllTodos, postTask, getTask, deleteTask, editTask, deleteAll, completedTask, getUserTask
 from .views import Users
 
 router = DefaultRouter()
@@ -18,5 +18,7 @@ urlpatterns = [
      path("getUsers/", Users.as_view()),
      path("addUser/", Users.as_view()),
      path("editUser/<uuid:id>", Users.as_view()),
-     path("deleteUsers/", Users.as_view())
+     path("deleteUsers/", Users.as_view()),
+
+     path("getUserTasks/<uuid:id>/", getUserTask)
 ]
