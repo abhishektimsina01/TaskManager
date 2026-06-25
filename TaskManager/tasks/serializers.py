@@ -11,7 +11,7 @@ class UserSerializer(serializers.Serializer):
     username = serializers.CharField(required = True)
     password = serializers.CharField(required = True, write_only = True)
     role = serializers.CharField(required = False)
-    created_data = serializers.DateTimeField(read_only = True)
+    created_at = serializers.DateTimeField(read_only = True)
 
     def create(self, validated_data):
         return Users.objects.create(**validated_data)
