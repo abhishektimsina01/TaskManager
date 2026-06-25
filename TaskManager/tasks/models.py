@@ -43,4 +43,4 @@ class Task(models.Model):
     updated_at = models.DateTimeField(auto_now= True)
 
     # if the corresponding is user is deleted then the task is also delted from the database
-    # user_id = models.ForeignKey(Users, on_delete= models.CASCADE)
+    user_id = models.ForeignKey(Users, on_delete= models.CASCADE)

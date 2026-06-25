@@ -18,5 +18,5 @@ urlpatterns = [
      path("getUsers/", Users.as_view()),
      path("addUser/", Users.as_view()),
      path("editUser/<uuid:id>", Users.as_view()),
-     path("deleteUsers", Users.as_view())
+     path("deleteUsers/", Users.as_view())
 ]

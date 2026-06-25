@@ -194,7 +194,6 @@ class Users(APIView):
         return Response(serialized.data)
     
     def delete(self, request):
-        print(request.DELETE)
         users = UsersModel.objects.all()
         serialized = UserSerializer(users, many = True)
         users.delete()
