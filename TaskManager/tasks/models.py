@@ -1,9 +1,16 @@
 from django.db import models
 from django.utils import timezone
 from datetime import timedelta, datetime, time
+from django.contrib.auth.models import AbstractUser, AbstractBaseUser
 import uuid
 
 # Create your models here.
+
+class CustomUser(AbstractUser):
+    # we have already got many properties and methods that allows us create and 
+    
+    pass
+
 
 # user model
 class Users(models.Model):
@@ -21,6 +28,8 @@ class Users(models.Model):
 # for the time to complete the task, we can use function to use the timezone and timedelta
 def default_deadline():
     return timezone.now() + timedelta(hours= 24)    
+
+
 
 # task model
 class Task(models.Model):
