@@ -6,10 +6,17 @@ import uuid
 
 # Create your models here.
 
+# creating my own User model so that i can add extra fields in the User model except the one that is provided
 class CustomUser(AbstractUser):
     # we have already got many properties and methods that allows us create and 
+    # perform different operations like set_password etc
+    # AbstractBaseUser --> AbstractUser <-- PermissionMixins
+    username = None
+    phone_number = models.CharField(max_length=10, unique=True)
+    bio = models.CharField(max_length=50, null= True)
     
-    pass
+    USERNAME_FIELD = "phone_number"
+    REQUIRED_FIELDS = []
 
 
 # user model
@@ -28,7 +35,6 @@ class Users(models.Model):
 # for the time to complete the task, we can use function to use the timezone and timedelta
 def default_deadline():
     return timezone.now() + timedelta(hours= 24)    
-
 
 
 # task model
