@@ -3,7 +3,8 @@ from django.utils import timezone
 from datetime import timedelta, datetime, time
 from django.contrib.auth.models import AbstractUser, AbstractBaseUser
 import uuid
-
+from .manager import CustomUserManager
+from django.conf import settings
 # Create your models here.
 
 # creating my own User model so that i can add extra fields in the User model except the one that is provided
@@ -11,27 +12,19 @@ class CustomUser(AbstractUser):
     # we have already got many properties and methods that allows us create and 
     # perform different operations like set_password etc
     # AbstractBaseUser --> AbstractUser <-- PermissionMixins
+    id = models.UUIDField(primary_key= True, default = uuid.uuid4)
     username = None
     phone_number = models.CharField(max_length=10, unique=True)
     bio = models.CharField(max_length=50, null= True)
+    created_at = models.DateTimeField(auto_now=True)
     
     USERNAME_FIELD = "phone_number"
     REQUIRED_FIELDS = []
 
+    objects = CustomUserManager()
 
-# user model
-class Users(models.Model):
-    # enum
-    ROLE_CHOICES = [
-        ("admin", "Admin"),
-        ("user", "User")
-    ]
-    id = models.UUIDField(primary_key= True, default= uuid.uuid4)
-    username = models.CharField(max_length=20, db_index= True, unique=True)
-    password = models.CharField(max_length=20)
-    role = models.CharField(choices= ROLE_CHOICES, default="user")
-    created_at = models.DateTimeField(auto_now=True)
-    
+
+
 # for the time to complete the task, we can use function to use the timezone and timedelta
 def default_deadline():
     return timezone.now() + timedelta(hours= 24)    
@@ -58,4 +51,4 @@ class Task(models.Model):
     updated_at = models.DateTimeField(auto_now= True)
 
     # if the corresponding is user is deleted then the task is also delted from the database
-    user_id = models.ForeignKey(Users, on_delete= models.CASCADE)
+    user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete= models.CASCADE)

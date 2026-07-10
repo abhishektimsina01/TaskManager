@@ -1,25 +1,28 @@
 from rest_framework.serializers import Serializer, ModelSerializer 
 from rest_framework import serializers
-from .models import Task, Users
+from .models import Task
 from django.utils import timezone
 from zoneinfo import ZoneInfo
+from django.contrib.auth import get_user_model
+
+CustomUser = get_user_model()
 
 
 class UserSerializer(serializers.Serializer):
 
     id = serializers.UUIDField(read_only = True)
-    username = serializers.CharField(required = True)
+    phone_number = serializers.CharField(required = True)
+    # username = serializers.CharField(required = True)
     password = serializers.CharField(required = True, write_only = True)
-    role = serializers.CharField(required = False)
     created_at = serializers.DateTimeField(read_only = True)
 
     def create(self, validated_data):
-        return Users.objects.create(**validated_data)
+        return CustomUser.objects.create_user(**validated_data)
     
     def update(self, instance, validated_data):
         # instance is the real data and validated_data is the data sent by the user
         instance.username = validated_data.get("username", instance.username)
-        instance.password = validated_data.get("password", instance.password)
+        instance.set_password(validated_data.get("password", instance.password))
         instance.role = validated_data.get("role", instance.role)
         instance.save()
         return instance
@@ -38,7 +41,7 @@ class TaskSerializer(Serializer):
     completed = serializers.BooleanField(required = False)
     completed_at = serializers.DateTimeField(required = False)
     deadline = serializers.DateTimeField(required = False)
-    user_id = serializers.PrimaryKeyRelatedField(queryset=Users.objects.all(), write_only = True)
+    user_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), write_only = True)
     user = UserSerializer(source = "user_id", read_only = True)
     created_at = serializers.DateTimeField(read_only = True)
     updated_at = serializers.DateTimeField(read_only = True)

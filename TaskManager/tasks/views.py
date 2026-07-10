@@ -10,15 +10,18 @@ from rest_framework.generics import ListCreateAPIView, RetrieveDestroyAPIView, R
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Task
-from .models import Users as UsersModel
+# from .models import CustomUser as UsersModel
 from .serializers import TaskModelSerializer, TaskSerializer
 from .serializers import UserSerializer
 from datetime import timedelta, datetime
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from zoneinfo import ZoneInfo
+from django.contrib.auth import get_user_model
 
-# Create your views here:- 
+UsersModel = get_user_model()
+
+# Create your views here:-  
 
 # **********************************************************************************************************************
 # Function based view(FBV):
