@@ -5,7 +5,8 @@ from django.contrib.auth.models import AbstractUser, AbstractBaseUser
 import uuid
 from .manager import CustomUserManager
 from django.conf import settings
-# Create your models here.
+
+
 
 # creating my own User model so that i can add extra fields in the User model except the one that is provided
 class CustomUser(AbstractUser):

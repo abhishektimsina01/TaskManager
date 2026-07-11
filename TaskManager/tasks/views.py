@@ -173,11 +173,13 @@ class Users(APIView):
         return Response(serialized.data)
 
     def post(self, request):
+        print("*"*10, "creating user", "*"*10)
         print(request.data)
         # return Response(request.data)
         serialized = UserSerializer(data = request.data)
         if serialized.is_valid():
             serialized.save()
+            print(serialized.data)
             return Response(serialized.data)
         else:
             return Response(serialized.errors)

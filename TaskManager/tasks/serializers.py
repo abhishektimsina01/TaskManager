@@ -13,6 +13,8 @@ class UserSerializer(serializers.Serializer):
     id = serializers.UUIDField(read_only = True)
     phone_number = serializers.CharField(required = True)
     # username = serializers.CharField(required = True)
+    bio = serializers.CharField(read_only = True)
+    created_at = serializers.DateTimeField(read_only = True)
     password = serializers.CharField(required = True, write_only = True)
     created_at = serializers.DateTimeField(read_only = True)
 
