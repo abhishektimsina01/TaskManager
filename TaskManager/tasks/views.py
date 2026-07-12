@@ -1,16 +1,20 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
+
+# generic Class Base View
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, CreateModelMixin
+# for Function Based View
 from rest_framework.decorators import api_view, action, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
+# Generics and mixins inherited
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView, DestroyAPIView, UpdateAPIView
 from rest_framework.generics import ListCreateAPIView, RetrieveDestroyAPIView, RetrieveUpdateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Task
-# from .models import CustomUser as UsersModel
 from .serializers import TaskModelSerializer, TaskSerializer
 from .serializers import UserSerializer
 from datetime import timedelta, datetime
@@ -18,6 +22,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from zoneinfo import ZoneInfo
 from django.contrib.auth import get_user_model
+
 
 UsersModel = get_user_model()
 
@@ -177,9 +182,12 @@ class Users(APIView):
         print(request.data)
         # return Response(request.data)
         serialized = UserSerializer(data = request.data)
+        print(serialized.is_valid())
         if serialized.is_valid():
-            serialized.save()
-            print(serialized.data)
+            a = serialized.save()
+            print(type(a))
+            # token = RefreshToken.for_user(a)
+            # print(token)
             return Response(serialized.data)
         else:
             return Response(serialized.errors)

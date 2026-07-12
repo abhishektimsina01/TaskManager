@@ -5,22 +5,20 @@ from django.contrib.auth.models import BaseUserManager, UserManager
 
 class CustomUserManager(BaseUserManager):
 
-    def create_user(self, phone_number, password, **extras):
+    def create_user(self, username, password, **extras):
 
         # we have to ensure that the field that is compulsary and unique, given to us
-        if not phone_number or not password:
+        if not username or not password:
             raise ValueError("full credentials was not given")
-        
         # create user with the data we have like, phone_number and all the extra fields
         user = self.model(
-            phone_number = phone_number,
+            username = username,
             **extras
         )
         # at the end we need to hash the passwrod as string or raw password is dangerous for storing 
         user.set_password(password)
         # we then save it in the _db
         user.save(using = self._db)
-        print(user)
         return user
     
     # this method is used to make the super user in our application and 

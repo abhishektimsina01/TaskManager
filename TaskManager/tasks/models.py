@@ -14,14 +14,10 @@ class CustomUser(AbstractUser):
     # perform different operations like set_password etc
     # AbstractBaseUser --> AbstractUser <-- PermissionMixins
     id = models.UUIDField(primary_key= True, default = uuid.uuid4)
-    username = None
     phone_number = models.CharField(max_length=10, unique=True)
     bio = models.CharField(max_length=50, null= True)
     created_at = models.DateTimeField(auto_now=True)
-    
-    USERNAME_FIELD = "phone_number"
     REQUIRED_FIELDS = []
-
     objects = CustomUserManager()
 
 

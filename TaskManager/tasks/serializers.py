@@ -5,20 +5,21 @@ from django.utils import timezone
 from zoneinfo import ZoneInfo
 from django.contrib.auth import get_user_model
 
-CustomUser = get_user_model()
+CustomUser = get_user_model()   
 
 
 class UserSerializer(serializers.Serializer):
 
     id = serializers.UUIDField(read_only = True)
-    phone_number = serializers.CharField(required = True)
-    # username = serializers.CharField(required = True)
-    bio = serializers.CharField(read_only = True)
+    username = serializers.CharField(required = True)
+    phone_number = serializers.CharField(required = False)
+    bio = serializers.CharField(required = True)
     created_at = serializers.DateTimeField(read_only = True)
     password = serializers.CharField(required = True, write_only = True)
     created_at = serializers.DateTimeField(read_only = True)
 
     def create(self, validated_data):
+        # creating the user
         return CustomUser.objects.create_user(**validated_data)
     
     def update(self, instance, validated_data):
