@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import getAllTodos, postTask, getTask, deleteTask, editTask, deleteAll, completedTask, getUserTask
 from .views import Users
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 router = DefaultRouter()
 
@@ -26,5 +26,4 @@ urlpatterns = [
      # for authentication
      path("login/", TokenObtainPairView.as_view()),
      path("refresh/", TokenRefreshView.as_view()),
-     path("verify/", TokenVerifyView.as_view())
 ]

@@ -186,9 +186,26 @@ class Users(APIView):
         if serialized.is_valid():
             a = serialized.save()
             print(type(a))
-            # token = RefreshToken.for_user(a)
-            # print(token)
-            return Response(serialized.data)
+            print(a.id)
+            print(a.username)
+            token = RefreshToken.for_user(a)
+            print(token.access_token)
+            response = Response({"data" : serialized.data,})
+            response.set_cookie(
+                key = "access_token",
+                value = str(token.access_token),
+                httponly = True,
+                secure = False,
+                max_age = 60*10
+            )
+            response.set_cookie(
+                key = "refresh_token",
+                value = str(token),
+                httponly=True,
+                secure=True,
+                max_age=60*60*24
+            )
+            return response
         else:
             return Response(serialized.errors)
 
