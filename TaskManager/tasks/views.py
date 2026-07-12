@@ -14,6 +14,7 @@ from rest_framework.generics import ListCreateAPIView, RetrieveDestroyAPIView, R
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
 from .models import Task
 from .serializers import TaskModelSerializer, TaskSerializer
 from .serializers import UserSerializer
@@ -31,7 +32,10 @@ UsersModel = get_user_model()
 # **********************************************************************************************************************
 # Function based view(FBV):
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def getAllTodos(request):
+    print('User information')
+    print(request.user)
     # request object contains all the information baout the http request done by the user
     print(request.GET)
     # all() means get all the objects/records from the table
@@ -190,21 +194,21 @@ class Users(APIView):
             print(a.username)
             token = RefreshToken.for_user(a)
             print(token.access_token)
-            response = Response({"data" : serialized.data,})
-            response.set_cookie(
-                key = "access_token",
-                value = str(token.access_token),
-                httponly = True,
-                secure = False,
-                max_age = 60*10
-            )
-            response.set_cookie(
-                key = "refresh_token",
-                value = str(token),
-                httponly=True,
-                secure=True,
-                max_age=60*60*24
-            )
+            response = Response({"data" : serialized.data, "access_token" : str(token.access_token), 'refresh_token' : str(token)})
+            # response.set_cookie(
+            #     key = "access_token",
+            #     value = str(token.access_token),
+            #     httponly = True,
+            #     secure = False,
+            #     max_age = 60*10
+            # )
+            # response.set_cookie(
+            #     key = "refresh_token",
+            #     value = str(token),
+            #     httponly=True,
+            #     secure=True,
+            #     max_age=60*60*24
+            # )
             return response
         else:
             return Response(serialized.errors)
