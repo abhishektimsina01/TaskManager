@@ -98,5 +98,24 @@ class TokenObtainSerializer(TokenObtainPairSerializer):
     # the TokenObtainPairSerializer allows us the validate method, which takes the username + password
     # it authneticates it, gets the user, generates the tokens(access and refesh)
     # provide us the tokens
+    @classmethod
+    def get_token(cls, user):
+        token =  super().get_token(user)
+        # now we can add all the required fields in the token which can be used by the frontend
+        # token['phone_number'] = user.phone_number
+        # token["bio"] = user.bio
+        return token
+    
+    # attrs is the dictionary that contains the attribute of the data that we need to validate/authenticate
     def validate(self, attrs):
-        print(attrs)
+        data = super().validate(attrs)
+        # data contains the access and refresh token, we can send additional data to it
+        # we get the information of the user from the self.user after the authenticte() method executes
+        # we can add the user informaton to it, which can be used by the views
+        # which can be sent as the response after the access and the refresh token is removed
+        data["user"] = {
+            "id" : self.user.id,
+            "username" : self.user.username
+        }
+        # now data contains the information + tokens (access and refresh)
+        return data

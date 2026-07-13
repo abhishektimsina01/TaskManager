@@ -1,18 +1,8 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-
-# generic Class Base View
-from rest_framework.generics import GenericAPIView
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, CreateModelMixin
-# for Function Based View
 from rest_framework.decorators import api_view, action, authentication_classes, permission_classes
 from rest_framework.response import Response
-from rest_framework.viewsets import ViewSet
-# Generics and mixins inherited
-from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView, DestroyAPIView, UpdateAPIView
-from rest_framework.generics import ListCreateAPIView, RetrieveDestroyAPIView, RetrieveUpdateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import status
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
@@ -33,7 +23,7 @@ UsersModel = get_user_model()
 @permission_classes([IsAuthenticated])
 def getAllTodos(request):
     print('User information')
-    print(request.user)
+    print(request.user.password)
     # request object contains all the information baout the http request done by the user
     print(request.GET)
     # all() means get all the objects/records from the table
@@ -193,20 +183,20 @@ class Users(APIView):
             token = RefreshToken.for_user(a)
             print(token.access_token)
             response = Response({"data" : serialized.data, "access_token" : str(token.access_token), 'refresh_token' : str(token)})
-            # response.set_cookie(
-            #     key = "access_token",
-            #     value = str(token.access_token),
-            #     httponly = True,
-            #     secure = False,
-            #     max_age = 60*10
-            # )
-            # response.set_cookie(
-            #     key = "refresh_token",
-            #     value = str(token),
-            #     httponly=True,
-            #     secure=True,
-            #     max_age=60*60*24
-            # )
+            response.set_cookie(
+                key = "access_token",
+                value = str(token.access_token),
+                httponly = True,
+                secure = False,
+                max_age = 60*10
+            )
+            response.set_cookie(
+                key = "refresh_token",
+                value = str(token),
+                httponly=True,
+                secure=True,
+                max_age=60*60*24
+            )
             return response
         else:
             return Response(serialized.errors)
@@ -262,10 +252,33 @@ def logoutUser(request):
 
 # the goal is to provide the user cookie when the user logs in rather than the JSON data:
 class LogIn(TokenObtainPairView):
+
     # for my own login endpoint view i need my own serializer class
     serializer_class = TokenObtainSerializer
 
+    # we need to apply the cookie to send the token not the JSON so we overide the POST method
     def post(self, request, *args, **kwargs):
+
         print(request.data)
-        serializer = self.get_serializer()
-        serialized = serializer()
+        response = super().post(request, *args, **kwargs)
+
+        access = response.data.get("access")
+        refresh = response.data.get("refresh")
+        response.set_cookie(
+                key = "access_token",
+                value = access,
+                httponly = True,
+                secure = False,
+                max_age = 60*10
+                )
+        response.set_cookie(
+            key = "refresh_token",
+            value = refresh,
+            httponly=True,
+            secure=True,
+            max_age=60*60*24
+            )
+        response.data.pop("access", None)
+        response.data.pop("refresh", None)
+
+        return Response(response)
