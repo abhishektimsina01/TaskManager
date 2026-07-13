@@ -4,6 +4,7 @@ from .models import Task
 from django.utils import timezone
 from zoneinfo import ZoneInfo
 from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 CustomUser = get_user_model()   
 
@@ -48,6 +49,7 @@ class TaskSerializer(Serializer):
     user = UserSerializer(source = "user_id", read_only = True)
     created_at = serializers.DateTimeField(read_only = True)
     updated_at = serializers.DateTimeField(read_only = True)
+
     # is called when the .save() is called after proper validation 
     def create(self, validated_data):
         return Task.objects.create(**validated_data)
@@ -73,7 +75,6 @@ class TaskSerializer(Serializer):
         return instance
 
 
-
 # create and update is already built-in, we only have build it if we want to customize
 class TaskModelSerializer(ModelSerializer):
     class Meta:
@@ -91,3 +92,11 @@ class TaskModelSerializer(ModelSerializer):
     # instance is the real object and validated_data is the to be changed to reocrd
     def update(self, instance, validated_data):
         return super().update(instance, validated_data)
+    
+
+class TokenObtainSerializer(TokenObtainPairSerializer):
+    # the TokenObtainPairSerializer allows us the validate method, which takes the username + password
+    # it authneticates it, gets the user, generates the tokens(access and refesh)
+    # provide us the tokens
+    def validate(self, attrs):
+        print(attrs)

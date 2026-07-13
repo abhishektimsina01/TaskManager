@@ -14,17 +14,15 @@ from rest_framework.generics import ListCreateAPIView, RetrieveDestroyAPIView, R
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
 from .models import Task
-from .serializers import TaskModelSerializer, TaskSerializer
-from .serializers import UserSerializer
+from .serializers import TaskModelSerializer, TaskSerializer, UserSerializer, TokenObtainSerializer
 from datetime import timedelta, datetime
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from zoneinfo import ZoneInfo
 from django.contrib.auth import get_user_model
-
-
 UsersModel = get_user_model()
 
 # Create your views here:-  
@@ -249,3 +247,25 @@ def getUserTask(request, id):
     for task in tasks_serialized.data:
         task.pop("user")
     return Response({ "user" : user_serialized.data, 'task' : tasks_serialized.data})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def logoutUser(request):
+    print(request.GET)
+
+    refresh_token = request.data.get("refresh")
+    token = RefreshToken(refresh_token)
+    token.blacklist()
+    return Response({"message" : "logged out"})
+
+
+# the goal is to provide the user cookie when the user logs in rather than the JSON data:
+class LogIn(TokenObtainPairView):
+    # for my own login endpoint view i need my own serializer class
+    serializer_class = TokenObtainSerializer
+
+    def post(self, request, *args, **kwargs):
+        print(request.data)
+        serializer = self.get_serializer()
+        serialized = serializer()
