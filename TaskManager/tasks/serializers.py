@@ -4,7 +4,7 @@ from .models import Task
 from django.utils import timezone
 from zoneinfo import ZoneInfo
 from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 
 CustomUser = get_user_model()   
 
@@ -119,3 +119,6 @@ class TokenObtainSerializer(TokenObtainPairSerializer):
         }
         # now data contains the information + tokens (access and refresh)
         return data
+
+class MyTokenRefreshSerializer(TokenRefreshSerializer):
+    pass

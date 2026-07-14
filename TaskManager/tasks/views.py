@@ -255,13 +255,14 @@ class LogIn(TokenObtainPairView):
 
     # for my own login endpoint view i need my own serializer class
     serializer_class = TokenObtainSerializer
-
+    
     # we need to apply the cookie to send the token not the JSON so we overide the POST method
     def post(self, request, *args, **kwargs):
 
         print(request.data)
         response = super().post(request, *args, **kwargs)
-
+        print(7)
+        print(response)
         access = response.data.get("access")
         refresh = response.data.get("refresh")
         response.set_cookie(
@@ -281,4 +282,4 @@ class LogIn(TokenObtainPairView):
         response.data.pop("access", None)
         response.data.pop("refresh", None)
 
-        return Response(response)
+        return response
