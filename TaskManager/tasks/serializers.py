@@ -4,7 +4,7 @@ from .models import Task
 from django.utils import timezone
 from zoneinfo import ZoneInfo
 from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer, TokenBlacklistSerializer
 
 CustomUser = get_user_model()   
 
@@ -94,7 +94,7 @@ class TaskModelSerializer(ModelSerializer):
         return super().update(instance, validated_data)
     
 
-class TokenObtainSerializer(TokenObtainPairSerializer):
+class MyTokenObtainSerializer(TokenObtainPairSerializer):
     # the TokenObtainPairSerializer allows us the validate method, which takes the username + password
     # it authneticates it, gets the user, generates the tokens(access and refesh)
     # provide us the tokens
@@ -122,3 +122,13 @@ class TokenObtainSerializer(TokenObtainPairSerializer):
 
 class MyTokenRefreshSerializer(TokenRefreshSerializer):
     pass
+
+class MyTokenBlackListSerializer(TokenBlacklistSerializer):
+
+    def valiadate(self, attrs):
+        # i get the refresh tokne from attrs
+        refresh_token = attrs["refresh"]
+        print(refresh_token)
+        data = super().validate(attrs)
+        data['message'] = "tokne blacklisted"
+        return data

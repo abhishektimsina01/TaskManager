@@ -27,6 +27,7 @@ urlpatterns = [
      
      # for authentication
      path("login/", LogIn.as_view()),
+     path("logout/", logoutUser),
      # path("login/", TokenObtainPairView.as_view()),
      path("refresh/", TokenRefreshView.as_view()),
 ]

@@ -1,13 +1,13 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view, action, authentication_classes, permission_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
 from rest_framework.permissions import IsAuthenticated
 from .models import Task
-from .serializers import TaskModelSerializer, TaskSerializer, UserSerializer, TokenObtainSerializer
+from .serializers import TaskModelSerializer, TaskSerializer, UserSerializer, MyTokenObtainSerializer, MyTokenRefreshSerializer, MyTokenBlackListSerializer
 from datetime import timedelta, datetime
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -182,7 +182,10 @@ class Users(APIView):
             print(a.username)
             token = RefreshToken.for_user(a)
             print(token.access_token)
-            response = Response({"data" : serialized.data, "access_token" : str(token.access_token), 'refresh_token' : str(token)})
+            response = Response({"data" : serialized.data,
+                                  "access_token" : str(token.access_token), 
+                                  'refresh_token' : str(token)
+                                })
             response.set_cookie(
                 key = "access_token",
                 value = str(token.access_token),
@@ -239,26 +242,13 @@ def getUserTask(request, id):
     return Response({ "user" : user_serialized.data, 'task' : tasks_serialized.data})
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def logoutUser(request):
-    print(request.GET)
-
-    refresh_token = request.data.get("refresh")
-    token = RefreshToken(refresh_token)
-    token.blacklist()
-    return Response({"message" : "logged out"})
-
 
 # the goal is to provide the user cookie when the user logs in rather than the JSON data:
 class LogIn(TokenObtainPairView):
-
     # for my own login endpoint view i need my own serializer class
-    serializer_class = TokenObtainSerializer
-    
+    serializer_class = MyTokenObtainSerializer
     # we need to apply the cookie to send the token not the JSON so we overide the POST method
     def post(self, request, *args, **kwargs):
-
         print(request.data)
         response = super().post(request, *args, **kwargs)
         print(7)
@@ -281,5 +271,25 @@ class LogIn(TokenObtainPairView):
             )
         response.data.pop("access", None)
         response.data.pop("refresh", None)
-
         return response
+
+
+# validates the refresh_token and send the access_token in the form of the cookie
+class Refresh(TokenRefreshView):
+    serializer_class = MyTokenRefreshSerializer
+
+    def post(self, request, *args, **kwargs):
+        # before sending the token, i need to take the cookie from the cookie and set it in request.data
+        
+        reponse = super().post(request, *args, **kwargs)
+
+
+# takes the refresh-token in the form of cookie, 
+# valiates the refrresh_token, 
+# blacklist the token and remove the cookies
+class LogOut(TokenBlacklistView):
+    serializer_class = MyTokenBlackListSerializer
+
+    def post(self, request, *args, **kwargs):
+        # before sending the 
+        return super().post(request, *args, **kwargs)
