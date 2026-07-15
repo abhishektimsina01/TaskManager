@@ -119,12 +119,18 @@ class MyTokenObtainSerializer(TokenObtainPairSerializer):
         }
         # now data contains the information + tokens (access and refresh)
         return data
+    
 
 class MyTokenRefreshSerializer(TokenRefreshSerializer):
-    pass
+    def validate(self, attrs):
+        print(1)
+        data = super().validate(attrs)
+        print(data)
+        print(4)
+        return data
+    
 
 class MyTokenBlackListSerializer(TokenBlacklistSerializer):
-
     def valiadate(self, attrs):
         # i get the refresh tokne from attrs
         refresh_token = attrs["refresh"]

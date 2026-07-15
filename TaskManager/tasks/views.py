@@ -23,6 +23,7 @@ UsersModel = get_user_model()
 @permission_classes([IsAuthenticated])
 def getAllTodos(request):
     print('User information')
+    print(request.user.username)
     print(request.user.password)
     # request object contains all the information baout the http request done by the user
     print(request.GET)
@@ -275,21 +276,54 @@ class LogIn(TokenObtainPairView):
 
 
 # validates the refresh_token and send the access_token in the form of the cookie
-class Refresh(TokenRefreshView):
-    serializer_class = MyTokenRefreshSerializer
-
-    def post(self, request, *args, **kwargs):
+    # permission_classes = [IsAuthenticated]
+@api_view(["GET"])
+def Refresh(request):
         # before sending the token, i need to take the cookie from the cookie and set it in request.data
-        
-        reponse = super().post(request, *args, **kwargs)
-
+        refresh_token = request.COOKIES.get("refresh_token")
+        print(refresh_token)
+        request.data['refresh'] = refresh_token
+        print(1)
+        print(request.data)
+        serializer = MyTokenRefreshSerializer(data = request.data)
+        try:
+            serializer.is_valid()
+        except:
+            return Response(serializer.errors)
+        print(serializer.validated_data)
+        response = Response({"message" : "created"})
+        response.set_cookie(
+            key = "refresh_token",
+            value = serializer.validated_data["refresh"],
+            httponly=True,
+            secure=True,
+            max_age=60*60*24
+        )
+        response.set_cookie(
+            key = "access_token",
+            value = serializer.validated_data["access"],
+            httponly=True,
+            secure=True,
+            max_age=60*10
+        )
+        return response
 
 # takes the refresh-token in the form of cookie, 
 # valiates the refrresh_token, 
 # blacklist the token and remove the cookies
-class LogOut(TokenBlacklistView):
-    serializer_class = MyTokenBlackListSerializer
+class LogOut(APIView):
+    # permission_classes = [IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):
-        # before sending the 
-        return super().post(request, *args, **kwargs)
+    def get(self, request):
+        access_token = request.COOKIES.get("access_token")
+        refresh_token = request.COOKIES.get("refresh_token")
+        request.data["refresh"] = refresh_token
+        serializer = MyTokenBlackListSerializer(data = request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except:
+            return Response(serializer.errors)
+        response = Response(serializer.validated_data)
+        response.delete_cookie("access_token")
+        response.delete_cookie("refresh_token")
+        return response
