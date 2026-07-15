@@ -124,9 +124,10 @@ class MyTokenObtainSerializer(TokenObtainPairSerializer):
 class MyTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         print(1)
+        print(attrs)
         data = super().validate(attrs)
         print(data)
-        print(4)
+        print(2)
         return data
     
 

@@ -276,20 +276,19 @@ class LogIn(TokenObtainPairView):
 
 
 # validates the refresh_token and send the access_token in the form of the cookie
-    # permission_classes = [IsAuthenticated]
 @api_view(["GET"])
 def Refresh(request):
         # before sending the token, i need to take the cookie from the cookie and set it in request.data
         refresh_token = request.COOKIES.get("refresh_token")
         print(refresh_token)
-        request.data['refresh'] = refresh_token
-        print(1)
-        print(request.data)
-        serializer = MyTokenRefreshSerializer(data = request.data)
+        data = {
+            "refresh" : refresh_token
+        }
+        serializer = MyTokenRefreshSerializer(data = data)
         try:
             serializer.is_valid()
-        except:
-            return Response(serializer.errors)
+        except: 
+            return Response({"error" : "error has occured"})
         print(serializer.validated_data)
         response = Response({"message" : "created"})
         response.set_cookie(
