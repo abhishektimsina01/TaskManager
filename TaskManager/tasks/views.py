@@ -159,7 +159,6 @@ def deleteAll(request):
 
 # class based view
 class Users(APIView):
-
     # in APIView, we can only use all the htpp methods ones and not more than one
     def get(self, request):
         print("get request")
@@ -169,41 +168,6 @@ class Users(APIView):
         serialized = UserSerializer(users, many = True)
         print(serialized.data)
         return Response(serialized.data)
-
-    def post(self, request):
-        print("*"*10, "creating user", "*"*10)
-        print(request.data)
-        # return Response(request.data)
-        serialized = UserSerializer(data = request.data)
-        print(serialized.is_valid())
-        if serialized.is_valid():
-            a = serialized.save()
-            print(type(a))
-            print(a.id)
-            print(a.username)
-            token = RefreshToken.for_user(a)
-            print(token.access_token)
-            response = Response({"data" : serialized.data,
-                                  "access_token" : str(token.access_token), 
-                                  'refresh_token' : str(token)
-                                })
-            response.set_cookie(
-                key = "access_token",
-                value = str(token.access_token),
-                httponly = True,
-                secure = False,
-                max_age = 60*10
-            )
-            response.set_cookie(
-                key = "refresh_token",
-                value = str(token),
-                httponly=True,
-                secure=True,
-                max_age=60*60*24
-            )
-            return response
-        else:
-            return Response(serialized.errors)
 
     def patch(self, request, id):
         print(request.data)
@@ -221,10 +185,47 @@ class Users(APIView):
         return Response(serialized.data)
     
     def delete(self, request):
+        print("delete endpoint")
         users = UsersModel.objects.all()
         serialized = UserSerializer(users, many = True)
+        print(serialized.data)
         users.delete()
-        return Response({'users' : serialized.data, 'message' : 'deleted all users'})
+        response = Response({'users' : serialized.data, 'message' : 'deleted all users'})
+        response.delete_cookie("access_token")
+        response.delete_cookie("refresh_cookie")
+        return response
+    
+@api_view(['POST'])
+def createUser(request):
+    print("*"*10, "creating user", "*"*10)
+    print(request.data)
+    # return Response(request.data)
+    serialized = UserSerializer(data = request.data)
+    print(serialized.is_valid())
+    if serialized.is_valid():
+        a = serialized.save()
+        print(type(a))
+        print(a.id)
+        print(a.username)
+        token = RefreshToken.for_user(a)
+        print(token.access_token)
+        response = Response(serialized.data)
+        response.set_cookie(
+            key = "access_token",
+            value = str(token.access_token),
+            httponly = True,
+            secure = False,
+            max_age = 60*10
+        )
+        response.set_cookie(
+            key = "refresh_token",
+            value = str(token),
+            httponly=True,
+            secure=True,
+            max_age=60*60*24
+        )
+        return response
+    return Response(serialized.errors)
 
 @api_view(['GET'])
 def getUserTask(request, id):
